@@ -1,0 +1,60 @@
+{
+  "type": "refinement",
+  "slug": "parent-class-invite-refine",
+  "task_id": "2026-04-13-parent-class-invite-refine",
+  "created_at": "2026-04-13",
+  "source_user_prompt": "아우라보드에 학부모 로그인 방식을 변경하고 싶어. 지금은 학급관리에서 학생 하나하나 학부모초대코드를 발급받아서 그걸 학부모에게 전달해줘야 하는 방식인데, 우리반 초대코드를 주고, 학부모가 본인 이메일로 가입하면 학생이랑 매칭되게 할 수는 없을까. 거기에 교사의 승인.",
+  "change_trigger": "학생별 개별 코드 발급·전달의 교사 운영 부담을 줄이고 학부모 셀프 온보딩(이메일 가입 + 학급 코드 + 자녀 셀프매칭)을 도입하되 사칭 리스크를 교사 승인 게이트로 차단한다.",
+  "target_seed_ids": [
+    "seed_37b35654542f"
+  ],
+  "target_docs": [
+    "plans/parent-viewer-roadmap.md",
+    "plans/seeds-index.md",
+    "tasks/2026-04-12-parent-viewer-access/phase4/seed.yaml",
+    "tasks/2026-04-12-parent-viewer-access/phase3/decisions.md"
+  ],
+  "proposed_changes": {
+    "code_scope": "student_per → classroom_per (학급 단위 단일 초대 코드)",
+    "onboarding_flow": "교사 1:1 코드 전달 → 학부모 이메일 자가 가입 + 학급 코드 입력 + 학생 명단에서 셀프 매칭",
+    "approval_gate": "ParentChildLink는 status='pending'으로 생성 → 교사 검토·승인(approve/reject) 후에만 'active' 전이"
+  },
+  "affected_decisions": [
+    "1.1 페어링 — Crockford Base32 6자리 학생별 코드 발급 방식 (student-scoped → classroom-scoped로 단위 변경)",
+    "1.1 페어링 — 코드 엔트로피 32^6≈10^9 (학급 단위 코드는 노출 면적·수명이 늘어나므로 길이/회전 정책 재산정 필요. 예: 8자리 또는 짧은 TTL 강제)",
+    "1.1 페어링 — 코드 수명 48h / maxUses 3 (학급 단위 코드는 학기 단위 등 장수명 + 무제한 maxUses 검토, 또는 회전 주기 도입)",
+    "1.1 brute-force 방어 — IP 5회/15분 + 코드 10회 실패 시 만료 (학급 코드는 정상 사용자도 다회 입력 가능 → 코드 단위 만료 트리거 정책 재설계)",
+    "1.1 페어링 — QR 병행 발급(학생 카드 드롭다운) (학급 단위로 이동 → 학급 설정 화면에서 단일 QR 발급)",
+    "1.1 인증 — 매직 링크 이메일 OTP 전용 v1 (셀프 가입 흐름에서는 가입 단계 + 매칭 신청 단계가 분리되므로 이메일 인증 시점 재정의)",
+    "1.1 자녀 매칭 — 교사가 코드 발급 시 studentId 지정 → ParentChildLink UPSERT (신규: 학부모가 학급 명단에서 셀프 선택, 동명이인·전학생 처리 정책 신규 결정)",
+    "1.1 학부모 1인당 자녀 5명 상한 (셀프매칭 + 교사 승인 흐름과 정합 재검토. 다중 학급 코드 입력 가능 여부 결정)",
+    "1.2 Revoke 경로 — 교사 1-click revoke (신규 단계: 승인 거부 reject, 승인 후 revoke, 보류 상태 자동 만료)",
+    "1.2 ParentChildLink.status 유니언 — 'active' | 'revoked' (신규: 'pending' 추가, 상태 전이 머신 재정의)",
+    "1.2 revokedReason — teacher_action / self_withdraw (신규: rejected_by_teacher, auto_expired_pending 등 사유 코드 추가)",
+    "1.2 Revoke SLA ≤ 60s (승인 게이트 도입 시 신규 시퀀스: 신청 → 알림 → 승인까지의 SLA 별도 정의 필요)",
+    "1.3 발급 한도 — Free 자녀당 2 / Pro 자녀당 5 (학급 단위 코드로 이동 시 발급 한도 의미 재정의 — 학급당? 학교당? 또는 폐지)",
+    "1.4 알림 — 교사 인앱 배지/이메일 (신규: '학부모 매칭 신청 N건 대기 중' 알림 + 학부모에게 '승인 대기/완료' 알림 신규)",
+    "1.5 동일 이메일 재가입 — 기존 ParentChildLink에 새 세션만 추가 (셀프매칭 흐름에서 다른 학급 코드로 추가 신청하는 경우 처리 정책 신규)",
+    "2. 데이터 모델 — ParentInviteCode (studentId FK 보유) (신규: classroomId FK로 전환 또는 ClassroomInviteCode 신규 엔티티 분리)",
+    "2. 데이터 모델 — ParentChildLink.issuedById (발급 교사) (신규: requestedAt, approvedAt, approvedById 감사 필드 추가)",
+    "3.1 페어링 시퀀스 — 교사 발급 → 학부모 등록 (전면 재작성: 교사 학급 코드 발급 → 학부모 이메일 가입 → 학급 코드 입력 → 학생 셀프 선택 → 교사 승인 큐 진입 → 교사 승인 → 활성화)",
+    "3.2 Revoke 시퀀스 — 신규 분기: 승인 거부(rejected) 시퀀스 추가",
+    "PV-2 작업 — Crockford Base32 + 학생 카드 드롭다운 + QR 모달 (학급 설정 메뉴로 위치 이동, 단일 코드/QR 발급 UI로 전면 개편)",
+    "PV-3 작업 — POST /api/parent/redeem (코드 검증 + 매직링크 발송) (신규: POST /api/parent/signup (이메일 가입) + POST /api/parent/match (학급 코드 + studentId 신청) 분리)",
+    "PV-8 교사 관리 UI — 학급 설정 '학부모 액세스' 탭 (신규: '승인 대기' 큐 섹션 + 신청별 학부모 이메일·선택 학생·신청 시각 + Approve/Reject 버튼)",
+    "PV-9 Revoke SLA — 60s (신규: 승인 SLA(예: 24h 권고) + pending 자동 만료(예: 7일) 정책 신규)",
+    "PV-12 E2E 보안 게이트 — 403/404/revoke/rate limit (신규: pending 상태에서 자녀 데이터 접근 차단 401/403 테스트, 사칭 신청 차단 시나리오)",
+    "1.2 격리 — 타 학생 PII 마스킹 정책 (신규: 학부모가 매칭 신청 단계에서 학급 학생 명단을 보게 됨 → 명단 표시 범위·필드(이름만? 사진? 출석번호?) 정책 신규)",
+    "보안 모델 — 학급 코드 유출 시 임팩트 (학생별 코드보다 큰 영향: 학급 전체 학생 명단 노출 가능 → 코드 노출 시 회전 절차 신규 정의)"
+  ],
+  "out_of_scope": [
+    "스마트폰 PWA `/parent/*` 클라이언트 셸 자체 (성능 예산·SWR 60s 폴링·이미지 파이프라인 등은 영향 없음)",
+    "자녀 데이터 범위 매트릭스(그림보드/식물관찰일지/행사/Breakout/숙제) — 매칭 후 열람 권한은 동일",
+    "RLS 격리 정책(타 학생 403, 타 학부모 404) — 매칭 활성화 후의 정책은 재사용",
+    "탈퇴 시퀀스 + 90일 익명화 — 동일하게 적용"
+  ],
+  "downstream_consumers": [
+    "padlet (Aura-board) — parent-viewer 기능의 단일 소스. PV-1 ~ PV-12 작업 카드 직접 영향"
+  ],
+  "next_phase": "phase1 audit"
+}

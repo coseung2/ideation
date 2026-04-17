@@ -1,0 +1,29 @@
+{
+  "type": "ideation",
+  "slug": "assignment-board-impl",
+  "task_id": "2026-04-14-assignment-board-impl",
+  "scope": "full_exploration",
+  "topic": "Aura-board에 '과제 배부·수거' 전용 보드 타입을 신설하여, 교사가 보드를 만들면 학급 학생 수만큼 카드가 자동으로 생성되고, 각 카드는 해당 학생의 제출물 슬롯이 되어 제출/미제출 상태가 시각적으로 구분되며 카드 클릭으로 제출물을 조회할 수 있게 한다.",
+  "motivation": "기존 일반 보드(post 방식)로는 '누가 냈고 누가 안 냈는지'를 교사가 직관적으로 확인하기 어렵다. 교사는 매번 roster와 대조하며 누락 학생을 수동 집계해야 하고, 학생은 빈 보드에서 자기 자리를 찾는 마찰이 있다. 미제출 학생 독려·재안내의 페인 포인트가 크므로 보드 자체가 roster 기반 '수거함' 역할을 하도록 구조화해야 한다.",
+  "target_user": ["교사", "학생"],
+  "expected_outcome": "교사가 과제 배부 보드를 1회 생성하면 해당 학급 roster에 따라 학생별 개인 카드가 자동 인스턴스화되고, 보드 뷰에서 제출 완료/미제출 카드가 색상·배지·필터로 한눈에 구분되며, 교사가 카드를 클릭하면 해당 학생의 제출 결과물(텍스트·이미지·첨부·링크)을 즉시 열람할 수 있다. 교사는 미제출 학생만 필터해 일괄 독려 액션을 걸 수 있다.",
+  "known_constraints": [
+    "태블릿(갤럭시 탭 S6 Lite + Chrome Android + S-Pen) 성능 최우선 — Padlet·Canva 둘 다 태블릿에서 렉. 학생 수 30명 카드 동시 렌더 시 스크롤·입력 지연 평가 필수",
+    "matrix-style 교사 집계 뷰는 owner+데스크톱 전용 가능, 학생(editor)·태블릿에는 제공 금지",
+    "ideation 단계이므로 실제 구현은 padlet 파이프라인으로 인수인계. 여기서는 데이터 모델·UX·라우팅 결정까지만",
+    "padlet 상위 폴더는 읽기 전용 — 기존 Board/Card/Submission 스키마는 참조만 가능",
+    "학생은 Aura-board의 학생(editor) 권한 체계를 재사용해야 함 (새 인증 플로우 금지)",
+    "roster 엔티티(학급 학생 명단) 존재 여부·형식을 phase1에서 확인 필요 (기존 Seed 7-v2 학급 코드·parent pairing에서 암시됨)",
+    "기존 Seed 3 event-signup의 Submission 엔티티 재사용 여부 판단 필요 — 과제 제출은 '신청'과 다른 성격(1인 1제출 강제, 제출물이 결과물 자체)"
+  ],
+  "related_docs": [
+    "plans/seeds-index.md",
+    "plans/event-signup-roadmap.md",
+    "plans/parent-viewer-roadmap.md",
+    "plans/implementation-roadmap.md",
+    "canva-assignment-pdf-merge/SKILL.md",
+    "tasks/2026-04-12-breakout-room-board/phase4/seed.yaml",
+    "tasks/2026-04-13-parent-class-invite-refine/phase2/delta.md"
+  ],
+  "created_at": "2026-04-14"
+}

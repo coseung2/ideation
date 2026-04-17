@@ -1,0 +1,135 @@
+goal: Build gongmun-assistant v1 — a CLI tool for Korean teachers that automatically
+  generates hwpx attachment files (명단표·동의서·가정통신문) from official document (공문) context
+  using Claude API and local deterministic Python
+task_type: code
+brownfield_context:
+  project_type: greenfield
+  context_references: []
+  existing_patterns: []
+  existing_dependencies: []
+constraints:
+- Python >= 3.11
+- hwpx format only via python-hwpx v2.9+ (lxml)
+- CLI execution mode only (no web/GUI in v1)
+- Windows primary, macOS/Linux compatible
+- Claude API (Sonnet default, Haiku fallback) for text analysis only
+- Personal data (명단 CSV) processed locally via deterministic Python, never passed
+  to LLM
+- 'P0 scope limited to 3 attachment types: 명단표·동의서·가정통신문'
+- No template CRUD commands in v1
+- gongmun.core must be execution-mode neutral for v2 GUI reuse
+acceptance_criteria:
+- '`gongmun attach --main main.hwpx` parses hwpx and extracts context via Claude API'
+- 'All inputs (hwpx file / text file / stdin / --prompt) converge to `main_text: str`
+  at Stage 1'
+- Attachment type can be auto-inferred (`--type auto`) or explicitly specified (`--type
+  roster
+- consent
+- parent-letter`)
+- Secondary path `--type parent-letter --prompt "..."` works without main document
+  (parent-letter only)
+- System bundle includes 6 templates (P0 3종 × 2 학교급 초/중고) validated by `scripts/validate_template.py`
+- User templates loadable from `~/.gongmun/templates/user/{type}/{name}.hwpx` with
+  YAML sidecar
+- Template load failure shows warning and skips without crashing
+- '`catalog.resolve(type, school_level, template_id?)` returns template_path + slot_manifest'
+- Windows `gongmun.bat` wrapper enables double-click terminal launch
+- Interactive prompt mode activates when no arguments provided
+ontology_schema:
+  name: GongmunAttachmentSpec
+  description: Domain model for Korean official document attachment generation pipeline
+    — from input document context through template resolution to hwpx output
+  fields:
+  - name: main_text
+    type: string
+    description: Normalized plain text extracted from input (hwpx/txt/stdin/prompt),
+      single convergence point at Stage 1
+    required: true
+  - name: attachment_type
+    type: string
+    description: One of roster
+    required: true
+  - name: school_level
+    type: string
+    description: elementary or middle-high — determines which system template variant
+      to use
+    required: true
+  - name: template_id
+    type: string
+    description: System or user-prefixed template identifier (e.g. user:my-consent-2026)
+    required: true
+  - name: slot_manifest
+    type: object
+    description: Map of slot tokens to values, keys in {{snake_case}} format with
+      * prefix for required slots
+    required: true
+  - name: document_context
+    type: object
+    description: Structured context extracted by Claude from main_text — includes
+      사업명, 근거법령, 기간, 대상
+    required: true
+  - name: csv_data
+    type: array
+    description: Personal data rows (명단·점수 etc.) processed locally by deterministic
+      Python, never LLM-routed
+    required: true
+  - name: output_hwpx_path
+    type: string
+    description: File path of the generated attachment hwpx file
+    required: true
+  - name: template_meta
+    type: object
+    description: YAML sidecar metadata — type, school_level, slots list, schema (table
+      header labels)
+    required: true
+  - name: pipeline_stage
+    type: number
+    description: Current processing stage (1-8) for tracing and error reporting
+    required: true
+evaluation_principles:
+- name: privacy_safety
+  description: Personal data never leaves local disk — no CSV or 명단 data routed through
+    LLM or network
+  weight: 0.95
+- name: context_fidelity
+  description: Generated attachment accurately reflects 사업명·법령·기간·대상 extracted from
+    main document
+  weight: 0.9
+- name: pipeline_simplicity
+  description: Single branch point at Stage 1; all inputs converge to main_text; no
+    downstream divergence
+  weight: 0.8
+- name: template_stability
+  description: System bundle templates pass validate_template.py on every release;
+    user templates fail gracefully without crash
+  weight: 0.85
+- name: cli_usability
+  description: Interactive prompt mode guides non-developer teachers; .bat wrapper
+    enables double-click launch on Windows
+  weight: 0.75
+exit_conditions:
+- name: p0_complete
+  description: All 3 P0 attachment types (명단표·동의서·가정통신문) generate valid hwpx output
+    from both primary (--main) and secondary (--type+--prompt) input paths
+  criteria: All 6 system templates validated + end-to-end Stage 1-8 pipeline passes
+    for each type
+- name: privacy_verified
+  description: 명단 CSV data confirmed to never enter LLM call paths via code audit
+    and test
+  criteria: Static analysis shows no CSV/personal data in any Claude API call payload
+- name: template_registry_stable
+  description: catalog.resolve() correctly merges system and user templates and returns
+    correct path+manifest
+  criteria: Unit tests cover system bundle lookup, user template merge, and graceful
+    failure on invalid user template
+- name: scope_boundary_held
+  description: No CRUD template commands, no web UI, no GUI implemented in v1 codebase
+  criteria: Code review confirms absence of template add/remove/validate commands
+    and no HTTP server dependencies
+metadata:
+  seed_id: seed_3f953e443fa1
+  version: 1.0.0
+  created_at: '2026-04-12T13:21:18.474286Z'
+  ambiguity_score: 0.177
+  interview_id: interview_20260412_131559
+  parent_seed_id: null

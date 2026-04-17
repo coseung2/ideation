@@ -1,0 +1,26 @@
+{
+  "type": "ideation",
+  "slug": "canva-publisher-receiver",
+  "task_id": "2026-04-12-canva-publisher-receiver",
+  "scope": "full_exploration",
+  "topic": "Aura-board 서버에 Canva Content Publisher 수신용 `/api/external/cards` 엔드포인트와 교사 PAT(Personal Access Token) 발급·관리 시스템을 구축한다",
+  "motivation": "Canva Content Publisher 앱(App ID AAHAAMW43f4)은 이미 완성되어 `POST https://aura-board-app.vercel.app/api/external/cards`를 호출하지만, 수신 측 Aura-board 서버에는 해당 엔드포인트도, Bearer 인증용 PAT 발급 UI도 없어 실제 발행이 실패한다. Seed 5에서 결정된 '교사 주체 프라이빗 앱' 모델을 서버 측에서 구현해야 Canva→Aura-board 플로우가 end-to-end로 닫힌다",
+  "target_user": "교사 (Canva에서 수업 자료를 만들어 Aura-board 반으로 즉시 발행하려는 주체)",
+  "expected_outcome": "교사가 Aura-board 설정 화면에서 PAT을 발급→복사→Canva 앱에 붙여넣기 하면, Canva Content Publisher에서 'Publish' 클릭 시 PNG+메타가 해당 교사의 지정 보드에 카드로 생성되고 `{ id, url }`이 반환되어 Canva UI에서 열람 링크가 노출된다",
+  "known_constraints": [
+    "Canva 클라이언트 호출 스펙 고정: POST /api/external/cards, Header `Authorization: Bearer {pat}`, Body `{ boardId, title, imageDataUrl(data: URL PNG) }`, 응답 `{ id, url }` — 서버가 이 계약을 반드시 수용해야 함",
+    "imageDataUrl은 base64 data URL 형태 PNG이므로 서버에서 디코딩→스토리지(Vercel Blob/Supabase Storage 등) 업로드→카드 레코드의 이미지 필드에 연결하는 파이프라인 필요",
+    "PAT은 교사 단위 자격증명 — 생성 시 1회만 평문 노출, 저장은 해시(bcrypt/argon2), 만료·폐기·마지막 사용 시각 표시, 보드 범위 제한 옵션 고려",
+    "Seed 2(Tier)에 따라 Content Publisher 수신은 Pro tier 게이팅 가능성 있음 — Free 교사의 PAT 발급/사용 차단 정책을 결정해야 함",
+    "Aura-board는 Next.js + Vercel 환경 (도메인 aura-board-app.vercel.app) — App Router route handler 또는 edge function 선택, Prisma/Supabase 스키마 확장 필요",
+    "보안: CORS는 Canva 앱 컨텍스트(브라우저)에서 직접 호출되므로 설정 필요, rate limit, 요청 크기 제한(대용량 PNG), CSRF 비적용(PAT Bearer)",
+    "Canva Content Publisher UX와의 에러 코드 매핑(401 invalid PAT, 403 tier/boardId 권한 없음, 413 too large, 422 invalid data URL 등)을 설계해 Canva UI에서 원인이 읽혀야 함"
+  ],
+  "related_docs": [
+    "plans/implementation-roadmap.md (P0-② Content Publisher 수신 엔드포인트 항목)",
+    "plans/seeds-index.md (Seed 5 seed_408901a564e8 Canva 통합 재검토·Content Publisher v1=교사 주체 프라이빗 앱, Seed 2 seed_8967b77d7759 Tier 정책)",
+    "~/aura-canva-app/src/intents/content_publisher/index.tsx (Canva 클라이언트 호출 스펙 원본 — 요청/응답 계약 참조)",
+    "research/canva-developer-aura-research.md (Canva Connect/앱 SDK 배경)"
+  ],
+  "created_at": "2026-04-12"
+}

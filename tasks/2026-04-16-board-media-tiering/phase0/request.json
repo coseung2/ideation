@@ -1,0 +1,35 @@
+{
+  "type": "ideation",
+  "task_id": "2026-04-16-board-media-tiering",
+  "slug": "board-media-tiering",
+  "scope": "parking",
+  "topic": "Aura-board에서 사용자(교사·학생)가 이미지·영상을 '더 많이' 올릴 수 있도록 저장 아키텍처를 2-Tier(핫=썸네일/콜드=원본)로 분리한다. 보드 상에는 썸네일·포스터만 노출하고, 사용자가 클릭했을 때만 원본을 R2/B2 같은 S3 호환 콜드 스토리지에서 로드한다.",
+  "motivation": "1차 동기는 C(Supabase 저장 한도/비용). 현재 사용자가 보드에 미디어를 많이 못 올리는 체감 제약이 스토리지 비용·용량 쪽에 걸려 있다고 판단. 부수적으로 B(보드 열 때 미디어 많을수록 태블릿 렌더링 렉) 문제도 같이 해결 가능. 사용자는 원래 AWS S3의 HDD 병렬·조각 분할 방식(Power of Two Choices + Erasure Coding 5+4, 1.8x 오버헤드)에 영감을 받아 '원본을 조각내 Google Drive/OneDrive에 분산 저장' 아이디어를 제시했으나, 오케스트레이터와의 대화에서 (a) 노드 몇 개 규모에선 병렬화 이득이 없고 (b) 개인 드라이브의 ToS 위반 소지 (c) 태블릿에서 청크 재조립 부하가 크다는 점이 합의되어 방향 전환. 대신 S3 정신에서 '티어링(핫/콜드 분리)' 부분만 차용하기로 함.",
+  "target_user": ["학생", "교사"],
+  "expected_outcome": "보드 렌더링 시 썸네일(이미지 ~30KB WebP, 비디오 포스터 + 10초 프리뷰)만 다운로드되어 갤럭시 탭 S6 Lite에서도 스크롤·줌이 부드럽고, 원본은 사용자 클릭 시에만 R2 또는 B2 같은 S3 호환 콜드 스토리지에서 로드된다. Supabase에 저장되는 바이트 수는 썸네일 수준으로 줄어 저장 비용이 5~10배 감소하고, 학생이 업로드 한도 걱정 없이 이미지·영상을 자유롭게 붙일 수 있다.",
+  "known_constraints": [
+    "기준 단말 = 갤럭시 탭 S6 Lite, Chrome Android, S-Pen",
+    "padlet/ 폴더는 읽기 전용, 여기선 설계·시드까지만",
+    "학생 개별 OAuth(Google Drive/OneDrive 연결)는 UX 부담 과도 — BYOS 방식 기각",
+    "원본을 청크로 쪼개 여러 드라이브에 분산(erasure coding 흉내)은 이득 없음 — 기각",
+    "콜드 스토리지는 S3 호환 서비스로 한정(R2, Backblaze B2, Tigris 등) — Supabase 클라이언트 로직 재활용 가능해야 함",
+    "태블릿에서 원본 재조립·디코딩 부하가 큰 방식 금지",
+    "동영상은 가능하면 HLS로 변환해 부분 스트리밍 (태블릿에서 원본 통짜 다운 회피)"
+  ],
+  "related_docs": [
+    "ideation/plans/tablet-performance-roadmap.md",
+    "ideation/plans/seeds-index.md",
+    "ideation/CLAUDE.md",
+    "ideation/tasks/2026-04-16-board-media-tiering/phase0/conversation_notes.md"
+  ],
+  "external_references": [
+    "https://bigdata.2minutestreaming.com/p/how-aws-s3-scales-with-tens-of-millions-of-hard-drives",
+    "https://news.ycombinator.com/item?id=45358280",
+    "https://www.youtube.com/watch?v=JpPbeO_TwWg"
+  ],
+  "created_at": "2026-04-16",
+  "status": "parked",
+  "parked_at": "2026-04-16",
+  "parked_reason": "결정해야 할 하위 항목 7개(콜드 공급자·썸네일 파이프라인·트랜스코딩·접근 제어·마이그레이션·Tier 정책·실패 모드)가 많아 사용자 피로. 실제 용량 한계 도달 시 재개.",
+  "parking_lot_entry": "ideas-parking-lot.md#보드-미디어-2-tier-저장-board-media-tiering"
+}

@@ -1,0 +1,31 @@
+{
+  "type": "feature",
+  "slug": "gongmun-attachment-autofill-v1",
+  "task_id": "2026-04-12-gongmun-attachment-autofill",
+  "change_type": "new_feature",
+  "motivation": "교사는 주 공문 기안 직후 붙임(명단·동의서·가정통신문)을 맥락 일치·서식 정합으로 반복 작성해야 하는데, 공문 본문 맥락과 붙임 슬롯을 잇는 도구가 부재함. LLM은 공개 맥락만 처리하고 개인정보(명단 CSV)는 로컬 결정론으로 주입하는 이중 경로로 이 구간을 자동화한다.",
+  "user_story": "교사로서 주 공문 파일 또는 텍스트를 CLI에 입력하면, 지정한 붙임 유형(명단·동의서·가정통신문)의 hwpx 파일이 맥락에 맞게 자동 생성된다",
+  "success_metric": "주 공문 text 입력부터 hwpx 출력까지 30초 이내, 한컴오피스에서 열었을 때 linesegarray 재계산 성공, 개인정보 포함 필드는 Claude API 미전송(정적 분석·mock 단언으로 검증)",
+  "affected_surfaces": [
+    "gongmun-assistant/cli/*.py",
+    "gongmun-assistant/core/orchestrator.py",
+    "gongmun-assistant/core/templates/*.py",
+    "gongmun-assistant/core/llm.py",
+    "gongmun-assistant/core/hwpx_io.py",
+    "gongmun-assistant/config.py",
+    "gongmun-assistant/templates/*.hwpx",
+    "gongmun-assistant/scripts/validate_template.py",
+    "gongmun-assistant/gongmun.bat"
+  ],
+  "context_refs": [
+    "ideation/plans/seeds-index.md",
+    "ideation/plans/gongmun-assistant-v1-roadmap.md",
+    "ideation/tasks/2026-04-12-gongmun-attachment-autofill/phase4/seed.yaml",
+    "ideation/tasks/2026-04-12-gongmun-attachment-autofill/phase3/decisions.md",
+    "ideation/tasks/2026-04-12-gongmun-attachment-autofill/phase5/updated_docs.md",
+    "ideation/tasks/2026-04-12-gongmun-attachment-autofill/phase5/new_docs.md",
+    "gongmun-assistant/skills/hwpx-master.SKILL.md",
+    "gongmun-assistant/README.md"
+  ],
+  "created_at": "2026-04-12T14:05:00+09:00"
+}

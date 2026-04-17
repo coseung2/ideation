@@ -1,0 +1,30 @@
+{
+  "type": "ideation",
+  "slug": "performance-assessment-autograde",
+  "task_id": "2026-04-16-performance-assessment-autograde",
+  "scope": "full_exploration",
+  "topic": "Aura-board 교실 앱에서 수행평가를 배부·응시(OMR 객관식 + 서술형)하고 자동채점 후 Aura 웹앱 성적 탭으로 실시간 송신하는 수행평가 자동화 파이프라인",
+  "motivation": "교사가 수행평가지를 인쇄·배부·수거·수기 채점·엑셀 입력·성적 통보까지 수행하는 다단계 수작업 플로우를 제거. 특히 객관식 OMR 수기 채점과 서술형 1차 채점의 시간 소모, 그리고 채점 결과를 Aura 웹앱 성적 기록부에 옮겨 적는 중복 입력을 없애야 함. 현재 assignment-board(seed_38c34e91bf28)는 제출물 수거까지만 다루고, 채점·성적 송신 레이어는 비어 있음.",
+  "target_user": "주사용자: 교사(출제·검수·성적 확인) + 학생(갤럭시 탭 S6 Lite로 응시·S-Pen 필기). 부차: 학부모(Aura 웹앱 성적 탭 열람, parent-viewer 매트릭스 연동 여부 phase1~3에서 결정).",
+  "expected_outcome": "교사가 Aura-board에 수행평가 보드를 배부하면 학생이 태블릿에서 객관식 마킹·서술형 필기(OCR)로 응시하고, 제출 즉시 객관식은 100% 자동채점·서술형은 AI 1차 채점 제안(교사 확정 전)이 생성되며, 확정 점수가 Aura 웹앱의 신규 '성적' 탭에 실시간 반영되어 학급 성적부·학생별 이력을 조회할 수 있다.",
+  "known_constraints": [
+    "갤럭시 탭 S6 Lite (Chrome Android + S-Pen) 성능 예산 — OMR 마킹·S-Pen 필기·OCR 모두 태블릿에서 저프레임드롭 요구",
+    "padlet/ 폴더 읽기 전용 — Aura-board 코드 직접 수정 금지, 확장 제안만 이관",
+    "aura/ 폴더 읽기 전용 — Aura 웹앱 성적 탭 설계는 INBOX/ 이관용 문서로만 산출",
+    "서술형 AI 채점 품질 보증 — 교사 최종 확정 전 '제안' 단계 필수, 오답 허용률·키워드 루브릭 기준 phase1에서 비교",
+    "개인정보·성적 보안 — 성적은 최고 민감도 데이터. 학생·학부모·교사 간 RLS·RBAC 엄격 분리 (seed_6d7077aac472 parent-viewer v2 정책 승계 검토)",
+    "네트워크 단절 대응 — 응시 중 와이파이 끊김 시 답안 로컬 저장·재접속 재개 요구",
+    "Aura-board → Aura 웹앱 송신 채널 — 공통 DB 공유인지 신규 API인지 phase1에서 탐색 (canva-publisher-receiver PAT 패턴 참조 가능)",
+    "assignment-board(seed_38c34e91bf28)와 중복 금지 — 본 주제는 채점·성적 송신 레이어에 특화, 제출물 수거 계층은 assignment-board 재사용 검토",
+    "부정행위 방지 — 태블릿 응시 중 화면 분할·외부 앱·웹 검색·학생 간 답안 공유·원격 도움 차단. BYOD 환경(MDM 미설치) 전제로 브라우저·보드앱 레벨 방어 우선 (phase1 축 F에서 비교)"
+  ],
+  "related_docs": [
+    "plans/assignment-board-roadmap.md",
+    "plans/parent-viewer-roadmap.md",
+    "plans/implementation-roadmap.md",
+    "plans/tablet-performance-roadmap.md",
+    "plans/canva-publisher-receiver-roadmap.md",
+    "plans/seeds-index.md"
+  ],
+  "created_at": "2026-04-16T00:00:00+09:00"
+}

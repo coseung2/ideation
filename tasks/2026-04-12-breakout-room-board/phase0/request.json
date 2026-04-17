@@ -1,0 +1,30 @@
+{
+  "type": "ideation",
+  "task_id": "2026-04-12-breakout-room-board",
+  "slug": "breakout-room-board",
+  "scope": "quick_decision",
+  "topic": "Aura-board에 'Breakout Room 보드'를 개별 보드 타입으로 도입하고, 생성 시 템플릿 갤러리에서 한 가지를 골라 모둠별 섹션·링크로 즉시 배포하는 플로우를 설계한다.",
+  "motivation": "Padlet Breakout rooms는 섹션 링크 격리 UX는 되지만 태블릿 30대 환경에서 렉이 심하고 템플릿화가 약해 교사가 매 수업마다 섹션·카드 구조를 수동으로 복제·리네이밍해야 한다. 갤럭시 탭 S6 Lite 기준으로 '새 Breakout 보드 → 템플릿 선택 → 모둠 수 지정 → 모둠별 링크 N개 발급'까지 3분 이내로 끝나야 교실 수업 흐름에 들어갈 수 있는데, 현재는 이 경로 자체가 제품에 존재하지 않는다.",
+  "target_user": ["교사", "학생"],
+  "expected_outcome": "교사가 Aura-board에서 'Breakout Room' 보드 타입을 선택해 토의/브레인스토밍/정리/발표 등 프리셋 템플릿 중 하나를 고르고, 모둠 수(N)를 입력하면 섹션 N개가 템플릿 구조대로 자동 생성되며 모둠별 accessToken 링크가 일괄 발급되어 복사·QR 배포 가능한 화면까지 단일 플로우로 도달한다. 학생은 자기 모둠 링크로 진입 시 해당 섹션만 로드되어 태블릿 성능 예산(TTI<3s, iframe≤3) 안에서 동작한다.",
+  "known_constraints": [
+    "기준 단말은 갤럭시 탭 S6 Lite, Chrome Android, 학교 Wi-Fi 50Mbps 공유 — 모든 UX는 이 성능 예산을 통과해야 함",
+    "섹션 격리·채널 분리·iframe LRU 3개 정책은 tablet-performance-roadmap.md T0-①~② 항목의 전제를 그대로 승계",
+    "Breakout은 '개별 보드의 한 종류' — 기존 일반 Board와 스키마를 공유하되 boardType 또는 별도 서브타입으로 구분, 매트릭스 뷰 등 데스크톱 전용 기능은 노출하지 않음",
+    "padlet/ 폴더는 읽기 전용, 실구현은 하지 않고 설계·시드까지만 진행",
+    "Free/Pro Tier 제약 승계: Free 1반, iframe·영상 제한 등 Seed 2 규칙과 정합해야 함",
+    "교사 통합 뷰와 학생 섹션 뷰 권한 분기는 rbac viewSection 기반 (roadmap 명시)",
+    "풀 자동화 — 인터뷰 질문은 에이전트가 배경 컨텍스트로 자답, 사용자 재확인은 중대 방향 전환에서만"
+  ],
+  "related_docs": [
+    "ideation/plans/tablet-performance-roadmap.md#5-별도-작업-t0-섹션-격리-breakout-뷰",
+    "ideation/plans/tablet-performance-roadmap.md#6-별도-작업-t0--iframe-가상화--라이브-모드-토글",
+    "ideation/plans/seeds-index.md",
+    "ideation/plans/seeds-index.md#seed_91bcd4e99efb (그림보드 — 보드 타입 확장 선례)",
+    "ideation/plans/seeds-index.md#seed_43fdf181262f (행사 신청 보드 — accessToken·owner·collaborator 패턴)",
+    "ideation/plans/seeds-index.md#seed_408901a564e8 (Canva 통합 6항목 재검토 — iframe LRU·Free/Pro)",
+    "ideation/CLAUDE.md",
+    "ideation/agents/capture-analyst.md"
+  ],
+  "created_at": "2026-04-12"
+}

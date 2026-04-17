@@ -1,0 +1,354 @@
+# Ouroboros Seed — Mallang Ranch P2E
+# seed_id: seed_f85d1cb8a245
+# interview_id: interview_20260413_070940
+# ambiguity_score: 0.132 (≤ 0.20 PASS)
+# generated_at: 2026-04-13T07:21:18.171768Z
+#
+# NOTE: 본 YAML은 두 부분으로 구성됨.
+#   (1) MCP 자동 생성 시드 (인터뷰 세션 캡처분)
+#   (2) supplemental_overlay — 사용자 최종 답변 라운드 (U1·U2·U3) 및 파생 분기
+#       (N5·N6·N7) 반영. MCP 세션은 사용자 라운드 종결 전 ambiguity 조기 종료한
+#       탓에 자동 시드에 미반영. phase5 integrator가 두 섹션을 병합하여 살아있는
+#       문서·핸드오프 request.json에 모두 적용해야 함.
+
+goal: Build a cozy P2E ranch mobile game (original brand inspired by 말랑말랑목장 aesthetics)
+  on Base L2 with NFT-primary revenue model, targeting global 170-country launch in
+  9 months with a solo developer
+task_type: code
+brownfield_context:
+  project_type: greenfield
+  context_references: []
+  existing_patterns: []
+  existing_dependencies: []
+constraints:
+- Solo developer (1-person team)
+- 9-month Season 0 MVP deadline
+- Base L2 only (no custom L2)
+- No direct IP usage from 말랑말랑목장 (aesthetics reference only, original brand required)
+- Korea IP/KYC blocked (170 countries, Korea excluded)
+- No $RANCH token at Season 0 launch (token-free until DAU 50K+)
+- No team reserve tokens (Sunflower Land philosophy)
+- Contracts deployed on Base + off-chain server only
+- Maximum 5-6 smart contracts
+- Gas-free gameplay
+- Open-source codebase
+acceptance_criteria:
+- Season 0 launches with 5 animal species, 3 rarity tiers (common/rare/epic), 3 ranch
+  sizes (trial/small/large)
+- 'Land NFT primary sale completes: 5,000 total supply (4,000 Small + 1,000 Large)
+  with WL 48h priority → public fixed-price 2-stage structure'
+- Small Land priced at 0.03 ETH public / 0.02 ETH WL; Large Land at 0.15 ETH public
+  / 0.10 ETH WL
+- Primary sale revenue split 70% team / 30% community treasury
+- Secondary royalty 5% split 50% team / 50% treasury
+- Treasury governed by Gnosis Safe 2-of-3 multisig at Season 0; upgrades to on-chain
+  Snapshot vote post-$RANCH TGE
+- $RANCH TGE triggered only after DAU reaches 50,000
+- Expected primary sale ceiling $675K covering $280K costs + $400K treasury seed
+- 'Smart contracts: AnimalNFT / LandNFT / ItemNFT / RanchToken / FeedClaim (Marketplace
+  via Reservoir delegation, 5-contract architecture)'
+- 'Triple token structure implemented: Animal/Land/Rare Item NFT + $RANCH ERC-20 +
+  $FEED spend-only'
+- 10 domain entities modeled
+- 'Development phases: 3mo contracts+audit → 3mo game loop+art integration → 3mo closed
+  alpha+bugfix+sale prep'
+ontology_schema:
+  name: MallangRanchP2EDomain
+  description: Core domain model for a cozy P2E ranch game on Base L2, covering NFT
+    assets, tokenomics, land ownership, animal breeding, revenue distribution, and
+    governance lifecycle
+  fields:
+  - name: animal
+    type: object
+    description: ERC-721 NFT with species (5 types), rarity (common/rare/epic), and
+      on-chain attributes
+    required: true
+  - name: land
+    type: object
+    description: ERC-721 NFT with size tier (trial/small/large), ownership, and capacity
+      metadata
+    required: true
+  - name: rare_item
+    type: object
+    description: ERC-721 NFT for special in-game items with rarity attributes
+    required: true
+  - name: ranch_token
+    type: object
+    description: $RANCH ERC-20 governance and utility token; not issued until DAU
+      50K+ TGE trigger
+    required: true
+  - name: feed_token
+    type: object
+    description: $FEED spend-only in-game currency; non-transferable, used for gameplay
+      actions
+    required: true
+  - name: primary_sale
+    type: object
+    description: Land NFT initial sale event with WL/public stages, pricing, and revenue
+      allocation
+    required: true
+  - name: revenue_split
+    type: object
+    description: Distribution record for primary (70/30 team/treasury) and secondary
+      (50/50) royalty flows
+    required: true
+  - name: treasury
+    type: object
+    description: Community treasury governed by Gnosis Safe multisig, seeded from
+      primary sale 30%
+    required: true
+  - name: season
+    type: object
+    description: Game season lifecycle (Season 0 = no token; Season 1+ = $RANCH active)
+      with DAU thresholds and TGE conditions
+    required: true
+  - name: governance
+    type: object
+    description: On-chain voting structure via Snapshot post-TGE; Season 0 uses team
+      committee + community advisory
+    required: true
+evaluation_principles:
+- name: solo_feasibility
+  description: All decisions must be executable by a single developer within 9-month
+    timeline without burnout
+  weight: 0.3
+- name: revenue_sustainability
+  description: Primary NFT sale must fully cover $280K launch costs and seed $400K+
+    treasury
+  weight: 0.25
+- name: community_trust
+  description: Revenue splits and governance structures must signal credible decentralization
+    (Sunflower philosophy alignment)
+  weight: 0.2
+- name: tokenomics_safety
+  description: $RANCH TGE only after proven DAU 50K+; $FEED must remain spend-only
+    with no speculative value
+  weight: 0.15
+- name: scope_minimalism
+  description: MVP scope frozen at confirmed minimums; no feature creep beyond 5 animals
+    / 3 rarities / 3 ranch sizes
+  weight: 0.1
+exit_conditions:
+- name: season0_launched
+  description: Season 0 is live on Base mainnet with NFT sale completed and game loop
+    functional
+  criteria: Primary sale closes with ≥80% of 5,000 Land NFTs sold and DAU growth trending
+    toward 50K
+- name: tge_triggered
+  description: $RANCH TGE conditions met
+  criteria: DAU sustained above 50,000 for 30 consecutive days
+- name: dev_failure
+  description: Solo developer cannot continue within 9-month window
+  criteria: Budget exhausted below $50K reserve or developer incapacitation — pause
+    and reassess team structure
+- name: scope_breach
+  description: MVP scope expands beyond confirmed limits
+  criteria: Any addition of animal species >5, rarity tiers >3, or ranch sizes >3
+    triggers scope review gate
+- name: treasury_governance_upgrade
+  description: Season 0 committee governance replaced by on-chain voting
+  criteria: $RANCH TGE completed and Snapshot contract deployed on Base
+metadata:
+  seed_id: seed_f85d1cb8a245
+  version: 1.0.0
+  created_at: '2026-04-13T07:21:18.171768Z'
+  ambiguity_score: 0.132
+  interview_id: interview_20260413_070940
+  parent_seed_id: null
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SUPPLEMENTAL OVERLAY (post-seed user round + derived branches)
+# ─────────────────────────────────────────────────────────────────────────────
+# 적용 규칙: phase5 integrator는 아래 overlay를 acceptance_criteria·constraints·
+# ontology에 머지하여 plans/handoff에 반영. overlay와 자동 시드가 충돌하면
+# overlay 우선 (사용자 최종 답변 라운드가 더 최근 결정).
+
+supplemental_overlay:
+  source:
+    type: user_final_round + new_branches
+    rounds:
+    - U1 (art pipeline + breeding pivot)
+    - U2 (Korean UI)
+    - U3 (codename-only branding)
+    - N5 (breeding chain boundary)
+    - N6 (breeding cooldown/limit)
+    - N7 (hybrid discovery reward)
+    timestamp: 2026-04-13
+
+  overrides:
+    rarity_tiers_revised:
+      original: 3 tiers (common/rare/epic)
+      revised: 2 base tiers (common/rare). Epic·legendary는 교배(breeding) emergent
+        결과로만 등장. base catalog에 epic 슬롯 미존재.
+      rationale: U1 — solo dev art workload 절감 + emergent rarity가 hybrid discovery
+        루프와 정합.
+    contract_count_revised:
+      original: 5 contracts (Marketplace via Reservoir delegation)
+      revised: 6 contracts. Marketplace를 자체 deploy (EIP-712 오더북 + Seaport 결제 위임형,
+        royalty enforce 자체 보장).
+      rationale: D4 phase3 — Reservoir 위임 시 royalty enforce·2차 수수료 수금이 제3자 인프라
+        의존 → 1인 운영 risk. Spearbit·Code4rena 경량 감사 $40K 예산 내 6개 OpenZeppelin
+        베이스 컨트랙트 가능.
+    audit_budget:
+      value: 40000
+      currency: USD
+      breakdown: 30K base audit + 10K re-audit reserve
+    primary_sale_revenue_breakdown:
+      team_472K: audit 40K + art_outsource 0 (solo Blender) + initial_ops_6_9mo 130K
+        + sustained_ops_2yr 192K + reserve 50K + breeding_dev_marginal 60K
+      treasury_202K: community events + season airdrops + bug bounty + DEX liquidity
+        seed at $RANCH TGE
+      note: 아트 외주 $60K 절감 → 교배 시스템 개발·예비비로 재배치 (U1)
+    tge_trigger_full:
+      condition: DAU 50K + 2차 마켓 월 거래량 $200K 2개월 연속 충족 → Season 2 시작점에 $RANCH
+        TGE
+      original_seed_partial: DAU 50K only
+      rationale: phase3 D2 — volume 트리거 누락. 활동 기반 airdrop weighting (플레이 시간·길드
+        기여·NFT 홀딩) 포함.
+
+  added_features:
+    breeding_system:
+      status: MVP_REQUIRED
+      summary: 두 부모 동물 교배 → 자손 동물. trait DNA 절차적 합성 + Blender shader 파라미터
+        매핑으로 런타임 외형 생성 (별도 모델링 불필요).
+      mechanics:
+        parent_count: 2
+        trait_inheritance: weighted average + random mutation + sometimes_rare_emergence
+        appearance: parent color/pattern/body weighted average + random mutation
+        stats: parent stat weighted average + variance
+        rarity_emergence: 사전 정의 hybrid pattern과 trait 조합 매치 시 새 hybrid breed 발견
+          (collection 보상)
+      onchain_offchain_boundary:
+        decision: Option B (Axie-style)
+        trait_dna_storage: off-chain (server)
+        result_nft_storage: on-chain (NFT mint with metadata hash)
+        rationale: N5 — Sunflower 오프체인 우선 원칙 정합, 가스비 ↓
+      cooldown_and_limits:
+        cooldown_initial_hours: 72
+        cooldown_increment_per_breed_hours: 24
+        lifetime_max_breeds_per_animal: 7
+        feed_cost_base: 100
+        feed_cost_modifier: 부모 희귀도 합산 가중
+        rationale: N6 — CryptoKitties siring cap 패턴, Axie 무한 교배 인플레 반면교사
+      hybrid_discovery_rewards:
+        predefined_hybrid_pattern_count_range: [30, 50]
+        first_discoverer_reward:
+        - NFT trophy (commemorative, non-tradeable initially)
+        - $FEED bonus
+        scope_for_content: Season 1·2 컨텐츠 (커뮤니티 6~12개월 발견 소요 추정)
+        rationale: N7 — discovery board 게이미피케이션 + 2차 마켓 깊이 ↑
+      tokenomics_impact:
+      - $FEED sink 추가 (인플레 완화)
+      - hybrid 발견 NFT 민팅 가능 (2차 마켓 추가 공급)
+      - cooldown·breeding limit으로 봇 매크로 방지
+
+    art_pipeline:
+      tool_chain:
+        client: Godot
+        modeling: Blender
+        outsourcing: false
+        artist: solo_developer (self)
+      modeling_workload:
+        base_animals: 5 species × 1 base mesh
+        accessories: 5-10 (cosmetic items)
+        estimated_weeks: 4-6
+      shader_strategy: Blender shader 파라미터 조합으로 런타임 외형 생성 (교배 자손 별도 모델링 불필요)
+
+    localization:
+      decision: option_A (Korean NOT provided)
+      languages_at_launch:
+      - English
+      - Japanese
+      - Vietnamese (SE Asia Web3)
+      - Thai (SE Asia Web3)
+      korean_excluded: true
+      rationale: U2 — 위메이드 이미르 전례, 한국 서비스 의도 부재를 언어 선택으로 증명. Pixels·Sunflower
+        SE Asia Web3 유저 비중 높음.
+
+    branding:
+      codename: mallang-ranch-p2e
+      external_brand_name: '{TBD_BRAND_NAME}'
+      art_style_placeholder: TBD (사용자 추후 결정)
+      usage_rule: phase4~7 모든 산출물에서 codename 사용. 마케팅 브랜드는 사용자가 직접 결정.
+      rationale: U3 — 사용자 직접 결정 영역, 에이전트 기본 추천 보류.
+
+  added_constraints:
+  - 'Breeding system: trait DNA 오프체인 / 결과 NFT 온체인 (Option B)'
+  - 'Breeding cooldown 72h base + 24h increment per breed, lifetime 7 breeds per animal'
+  - 'Breeding cost 100 $FEED base + parent rarity weighted modifier'
+  - 'Korean UI NOT provided. EN/JA/VI/TH only at launch'
+  - 'Brand name remains TBD ({TBD_BRAND_NAME}); codename mallang-ranch-p2e for all
+    artifacts'
+  - 'Art pipeline: Godot client + Blender modeling, solo developer no outsourcing'
+  - 'Audit budget cap $40K (30K base + 10K re-audit reserve)'
+  - 'TGE trigger: DAU 50K + monthly secondary volume $200K, both sustained 2 consecutive
+    months'
+
+  added_acceptance_criteria:
+  - 'Breeding MVP shipped: 2-parent breeding produces offspring with weighted-average
+    + mutation traits, off-chain DNA + on-chain NFT result'
+  - 'Hybrid discovery board live: 30-50 predefined hybrid patterns, first-discoverer
+    NFT trophy + $FEED bonus'
+  - 'Animal rarity revised: 2 base tiers (common/rare) at launch; epic+ emerges from
+    breeding only'
+  - 'Smart contracts revised to 6: AnimalNFT / LandNFT / ItemNFT / RanchToken / FeedClaim
+    / Marketplace (self-deployed, EIP-712 + Seaport delegation, royalty enforce)'
+  - 'Localization at launch: English, Japanese, Vietnamese, Thai. Korean NOT provided'
+  - 'Codename mallang-ranch-p2e used in all artifacts; external brand placeholder
+    {TBD_BRAND_NAME}'
+  - '$RANCH TGE trigger requires both DAU≥50K AND monthly secondary volume ≥$200K
+    sustained 2 consecutive months'
+  - 'Cayman Foundation 설립은 TGE 6개월 전 완료 (Season 0는 개인사업자/싱가포르 BVI Ltd로 시작 가능)'
+  - 'Breeding economics: 100 $FEED base cost, lifetime 7 breeds/animal cap, 72h cooldown
+    +24h increment'
+
+  added_ontology_fields:
+  - name: breeding_event
+    type: object
+    description: 두 부모 동물 교배 트랜잭션. parent_a_id, parent_b_id, child_id, trait_dna_hash
+      (on-chain), full_dna (off-chain), feed_cost, cooldown_until, breed_count_consumed
+      필드 포함
+    required: true
+  - name: hybrid_pattern
+    type: object
+    description: 사전 정의 hybrid breed 카탈로그 (30-50종). pattern_id, trait_signature,
+      first_discoverer_address, discovery_timestamp, trophy_nft_id 필드 포함
+    required: true
+  - name: trait_dna
+    type: object
+    description: 동물의 절차적 외형/스탯 DNA. off-chain 저장, on-chain은 hash만. parent_lineage,
+      color_genes, pattern_genes, stat_genes, mutation_seed 필드
+    required: true
+
+  open_branches_parked:
+  - id: N1
+    title: Cayman Foundation 설립 시점
+    decision: TGE 6개월 전 설립. Season 0는 개인사업자 or 싱가포르 BVI Ltd로 시작.
+    park_to: ideas-parking-lot.md
+  - id: N2
+    title: Apple iOS F2P 네이티브 빌드
+    decision: v2 파킹 (1인 9개월 타겟엔 2-3개월 추가 공수 과도)
+    park_to: ideas-parking-lot.md
+  - id: N3
+    title: Immutable zkEVM Passport 크로스체인 활용
+    decision: 기본 Base + Coinbase Smart Wallet, Immutable Passport는 심사 통과 시 2순위 조건부
+    park_to: research-vault (followup investigation)
+  - id: N4
+    title: Proof of Humanity 선택
+    decision: Gitcoin Passport (Web3 네이티브·무료·Base 연동). World ID는 iris scan 진입장벽으로
+      후순위
+    park_to: ideas-parking-lot.md
+
+  validation_checklist_status:
+    D1_5animals_2rarity_3ranch_9mo: PASS (rarity revised to 2 per U1)
+    D2_no_token_DAU_volume_TGE: PASS (volume trigger added via overlay)
+    D3_5000_land_pricing_WL_public: PASS
+    D4_6_contracts_audit_40K: PASS (contract count revised to 6 via overlay)
+    D5_70_30_primary_50_50_secondary_safe_2of3: PASS
+    D6_global_170_korea_blocked_PWA_Cayman: PASS
+    U1_breeding_pivot_godot_blender_solo: PASS
+    U2_no_korean_EN_JA_SEA: PASS
+    U3_codename_only_TBD_brand: PASS
+    N5_breeding_offchain_DNA_onchain_NFT: PASS
+    N6_breeding_cooldown_72h_lifetime_7: PASS
+    N7_hybrid_discovery_30_50_NFT_trophy: PASS

@@ -1,0 +1,31 @@
+{
+  "type": "ideation",
+  "slug": "parent-viewer-access",
+  "task_id": "2026-04-12-parent-viewer-access",
+  "scope": "full_exploration",
+  "topic": "Aura-board 전반에 걸친 학부모(Parent/Viewer) 역할 본체 구현 — 자녀(학생) 한정 열람 전용 접근 기능을 인증·RBAC·공유 정책 레이어에서 cross-cutting 하게 도입",
+  "motivation": "그림보드(Seed 1)·식물관찰일지(Seed 4) 등 개별 시드에서 '학부모가 자녀 것은 공유 여부 무관 항상 열람'이 이미 결정돼 있으나, 정작 학부모 계정·로그인 경로·자녀 매핑·RBAC 분기·디바이스(스마트폰) UX가 부재해 약속한 기능이 작동 불가. BoardMember.role 확장('parent' 추가 고려)도 예정 상태로만 메모리에 남아있어 실제 배포 차단 중.",
+  "target_user": "학부모(주 사용자, 스마트폰 중심) · 학생(자녀로 연결되는 대상) · 교사(학부모 초대·검증·철회 권한자)",
+  "expected_outcome": "학부모가 교사가 발급한 초대 링크 또는 자녀 식별 정보로 접근해 자기 자녀 1인의 그림보드·식물관찰일지·(향후 타 보드) 산출물을 공유 플래그(isPrivate/isPublic)와 무관하게 read-only로 열람 가능. 학부모는 다른 학생·다른 반·편집/댓글 기능에 접근 불가. 스마트폰 세로 레이아웃에서도 핵심 열람 흐름이 동작.",
+  "known_constraints": [
+    "기준 태블릿은 갤럭시 탭 S6 Lite(교사·학생용)지만 학부모는 스마트폰 접근 가능성이 높음 — 모바일 세로 뷰포트 대응이 신규 제약",
+    "Seed 1(그림보드): '학부모 자녀 전체 열람(공유 여부 무관)'이 이미 결정 — 개별 애셋 isPrivate 토글보다 상위 권한",
+    "Seed 4(식물관찰일지): '학부모 viewer 자녀 1인 전체 열람' 결정 — 반 공개/비공개 토글보다 상위",
+    "memory project_matrix_desktop_only.md: BoardMember.role에 'parent' 추가 고려 중 — 기존 스키마 변경 필요",
+    "학부모-학생 매핑(ParentChildLink)이 신규 엔티티로 요구됨 (1:N 허용? 복수 보호자 지원?)",
+    "초대·인증 방식 미정 (이메일 매직링크 vs 교사 발급 accessToken vs 기존 Seed 3 accessToken 재사용)",
+    "학부모는 write/comment 차단 — read-only RBAC 분기 일관성 필요 (모든 보드 타입에 적용)",
+    "Pro 티어 한정 기능 여부 미정 (Seed 2 가격 정책과 상호작용)",
+    "개인정보·권한 관리 이슈: 학부모 탈퇴·이혼·양육권 변경 시 접근 철회 절차 필요"
+  ],
+  "related_docs": [
+    "plans/drawing-board-library-roadmap.md",
+    "plans/plant-journal-roadmap.md",
+    "plans/seeds-index.md",
+    "plans/breakout-room-roadmap.md",
+    "plans/implementation-roadmap.md",
+    "memory/project_matrix_desktop_only.md",
+    "tasks/2026-04-12-parent-viewer-access/"
+  ],
+  "created_at": "2026-04-12"
+}

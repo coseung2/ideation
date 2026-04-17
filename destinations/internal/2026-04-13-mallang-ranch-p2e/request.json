@@ -1,0 +1,32 @@
+{
+  "type": "project_bootstrap",
+  "slug": "mallang-ranch-p2e",
+  "task_id": "2026-04-13-mallang-ranch-p2e",
+  "destination_project": "mallang-ranch (외부 신규 — 미생성 상태)",
+  "change_type": "new_project_scaffolding",
+  "motivation": "1인 개발자가 9개월 안에 Base L2 위에서 NFT 중심 수익 모델(Land 1차 분양 $675K 천장 + 2차 로열티 5%)로 글로벌 170개국(한국 제외) 런치할 코지 P2E 목장 게임을 만든다. 원작 '말랑말랑목장' 감성만 레퍼런스로 삼고 IP·아트는 오리지널로 대체. Sunflower Land 철학(no team reserve · no pre-mine · community treasury)을 계승하되 교배 시스템으로 리텐션 동력을 추가하고, Season 0는 토큰 없이 런치하여 SEC Howey 리스크를 회피한다.",
+  "user_story": "P2E 게이머로서 Base 체인 지갑만 연결하면 한국어가 아닌 영어/일본어/베트남어/태국어 UI로 코지 목장을 경영하고, 5종 베이스 동물을 교배해 희귀 하이브리드 종을 발견·NFT로 소유하고, Season 0 동안은 토큰 없는 순수 게임플레이를, Season 2 TGE 이후에는 $RANCH 거버넌스 참여를 즐길 수 있다.",
+  "success_metric": "Season 0 MVP를 착수 후 9개월 내 Base 메인넷에 런치하여 Land NFT 5,000개 중 ≥80% 분양 완료 + 일일 활성 유저(DAU) 5만 명을 향한 우상향 성장 궤적 확보. 지속 트리거로 DAU 50K + 2차 마켓 월 거래량 $200K가 2개월 연속 충족되면 Season 2 시점에 $RANCH TGE.",
+  "affected_surfaces": [
+    "smart contracts (6개: AnimalNFT·LandNFT·ItemNFT·RanchToken·FeedClaim·Marketplace 자체 deploy / EIP-712 오더북 + Seaport 결제 위임 / 로열티 enforce)",
+    "Godot 클라이언트 (Web build·PWA 우선, Google Play v2, Apple iOS F2P 빌드는 파킹)",
+    "Blender 에셋 파이프라인 (베이스 5종 1 base mesh + 코스튬 5~10종 + shader 파라미터 기반 절차적 trait DNA 외형 매핑)",
+    "오프체인 백엔드 (게임 상태·$FEED 포인트 원장·trait DNA 저장소·breeding genetics 엔진·wallet sync·오라클 서명 서비스)",
+    "Cayman Foundation 법인 (TGE 6개월 전 설립 목표; Season 0는 개인사업자 또는 싱가포르 BVI Ltd로 시작)",
+    "지역화 (영어·일본어·베트남어·태국어 4개 언어, 한국어 미제공 — 위메이드 이미르 전례 기반 규제 시그널링)",
+    "IP/KYC 차단 레이어 (한국 IP geo-block + 한국 거주지 KYC 페이아웃 차단)",
+    "Proof of Humanity 통합 (Gitcoin Passport, Base 연동 무료 웹3 네이티브)",
+    "Treasury·Governance (Season 0 Gnosis Safe 2-of-3 → Season 2 Snapshot + 7일 Timelock 멀티시그)"
+  ],
+  "context_refs": [
+    "tasks/2026-04-13-mallang-ranch-p2e/phase4/seed.yaml",
+    "tasks/2026-04-13-mallang-ranch-p2e/phase3/decisions.md",
+    "plans/mallang-ranch-p2e-roadmap.md",
+    "data/mallang-ranch-seed.json",
+    "tasks/2026-04-13-mallang-ranch-p2e/phase1/exploration.md",
+    "tasks/2026-04-13-mallang-ranch-p2e/phase2/sketch.md",
+    "tasks/2026-04-13-mallang-ranch-p2e/phase5/updated_docs.md",
+    "tasks/2026-04-13-mallang-ranch-p2e/phase5/new_docs.md"
+  ],
+  "created_at": "2026-04-13"
+}

@@ -1,0 +1,217 @@
+{
+  "$schema": "mallang-ranch-seed.v1",
+  "generated_at": "2026-04-13",
+  "source_seed": "seed_f85d1cb8a245",
+  "task_id": "2026-04-13-mallang-ranch-p2e",
+  "notes": "외부 신규 P2E 프로젝트 시드 데이터 skeleton. 베이스 동물 5종 + 희귀도 2단계 + 랜치 3크기 + hybrid 패턴 placeholder 30~50종. hybrid 패턴 상세(부모 trait 시그니처·자손 외형 파라미터·통계 보너스)는 Godot/Blender 통합 시점에 게임 디자인에서 채움. Aura-board와 무관 — 외부 저장소 mallang-ranch/ 에서 사용.",
+  "branding": {
+    "codename": "mallang-ranch-p2e",
+    "external_brand_name": "{TBD_BRAND_NAME}",
+    "art_style_placeholder": "TBD"
+  },
+  "base_animals": [
+    {
+      "slug": "cow",
+      "koreanName": "소",
+      "englishName": "Cow",
+      "primaryProduct": "milk",
+      "harvestCycleHours": 12,
+      "baseStats": { "yield": 5, "stamina": 6, "fertility": 5 },
+      "appearancePalette": ["#f4e4d4", "#3a2820", "#ffffff"]
+    },
+    {
+      "slug": "chicken",
+      "koreanName": "닭",
+      "englishName": "Chicken",
+      "primaryProduct": "egg",
+      "harvestCycleHours": 4,
+      "baseStats": { "yield": 3, "stamina": 4, "fertility": 8 },
+      "appearancePalette": ["#f5d76e", "#a52a2a", "#ffffff"]
+    },
+    {
+      "slug": "sheep",
+      "koreanName": "양",
+      "englishName": "Sheep",
+      "primaryProduct": "wool",
+      "harvestCycleHours": 24,
+      "baseStats": { "yield": 6, "stamina": 5, "fertility": 4 },
+      "appearancePalette": ["#fafafa", "#2c2c2c", "#d2b48c"]
+    },
+    {
+      "slug": "rabbit",
+      "koreanName": "토끼",
+      "englishName": "Rabbit",
+      "primaryProduct": "carrot_forage",
+      "harvestCycleHours": 6,
+      "baseStats": { "yield": 2, "stamina": 7, "fertility": 9 },
+      "appearancePalette": ["#ffffff", "#3a2820", "#d2b48c", "#5d4037"]
+    },
+    {
+      "slug": "alpaca",
+      "koreanName": "알파카",
+      "englishName": "Alpaca",
+      "primaryProduct": "alpaca_fleece",
+      "harvestCycleHours": 36,
+      "baseStats": { "yield": 7, "stamina": 6, "fertility": 3 },
+      "appearancePalette": ["#fefefe", "#8b4513", "#a0a0a0", "#f5deb3"]
+    }
+  ],
+  "rarity_tiers": [
+    {
+      "slug": "common",
+      "name": "Common",
+      "weight": 0.85,
+      "available_at_launch": true,
+      "source": ["primary_sale", "starter_pack", "breeding"]
+    },
+    {
+      "slug": "rare",
+      "name": "Rare",
+      "weight": 0.15,
+      "available_at_launch": true,
+      "source": ["primary_sale", "breeding"]
+    },
+    {
+      "slug": "epic",
+      "name": "Epic",
+      "weight": 0.0,
+      "available_at_launch": false,
+      "source": ["breeding_emergent_only"],
+      "note": "베이스 카탈로그 슬롯 미존재. 교배 결과로만 등장 (U1 피벗)."
+    },
+    {
+      "slug": "legendary",
+      "name": "Legendary",
+      "weight": 0.0,
+      "available_at_launch": false,
+      "source": ["breeding_emergent_only"],
+      "note": "동일 — emergent. hybrid 패턴 매치 시 극희귀 발현."
+    }
+  ],
+  "ranch_sizes": [
+    {
+      "slug": "trial",
+      "grid": "6x6",
+      "animal_capacity": 4,
+      "for_sale": false,
+      "note": "체험용. 1차 분양 미포함."
+    },
+    {
+      "slug": "small",
+      "grid": "10x10",
+      "animal_capacity": 12,
+      "for_sale": true,
+      "supply_cap": 4000,
+      "price_eth_public": 0.03,
+      "price_eth_wl": 0.02
+    },
+    {
+      "slug": "large",
+      "grid": "16x16",
+      "animal_capacity": 32,
+      "for_sale": true,
+      "supply_cap": 1000,
+      "price_eth_public": 0.15,
+      "price_eth_wl": 0.10
+    }
+  ],
+  "land_sale": {
+    "total_supply_cap": 5000,
+    "structure": "WL_48h_priority -> 3wk_gap -> public_fixed_price",
+    "wl_slot_target": 2000,
+    "expected_revenue_ceiling_usd": 675000,
+    "eth_assumed_usd": 3000,
+    "primary_split": { "team": 0.7, "treasury": 0.3 },
+    "secondary_royalty_rate": 0.05,
+    "secondary_split": { "team": 0.5, "treasury": 0.5 }
+  },
+  "breeding_system": {
+    "parent_count": 2,
+    "trait_dna_storage": "off-chain",
+    "result_nft_storage": "on-chain",
+    "metadata_hash_on_chain": true,
+    "cooldown_initial_hours": 72,
+    "cooldown_increment_per_breed_hours": 24,
+    "lifetime_max_breeds_per_animal": 7,
+    "feed_cost_base": 100,
+    "feed_cost_modifier": "sum_of_parent_rarity_weight",
+    "first_discoverer_reward": ["NFT_trophy_non_tradeable_initially", "FEED_bonus"]
+  },
+  "hybrid_patterns_skeleton": {
+    "target_count_range": [30, 50],
+    "discovery_window_estimate_months": [6, 12],
+    "fields_per_pattern": [
+      "pattern_id",
+      "trait_signature",
+      "parent_species_combo",
+      "result_appearance_params",
+      "result_stat_modifiers",
+      "first_discoverer_address",
+      "discovery_timestamp",
+      "trophy_nft_id"
+    ],
+    "patterns": [
+      {
+        "pattern_id": "hyb_001",
+        "placeholder": true,
+        "note": "구체적 trait_signature·외형·스탯은 Godot/Blender shader 통합 시점에 게임 디자인에서 채움."
+      },
+      {
+        "pattern_id": "hyb_002",
+        "placeholder": true,
+        "note": "동일 placeholder."
+      },
+      {
+        "pattern_id": "hyb_003",
+        "placeholder": true,
+        "note": "동일 placeholder."
+      }
+    ]
+  },
+  "tokenomics": {
+    "tokens": [
+      {
+        "slug": "RANCH",
+        "type": "ERC-20",
+        "issued_at_launch": false,
+        "tge_trigger": {
+          "dau_threshold": 50000,
+          "monthly_secondary_volume_usd": 200000,
+          "consecutive_months_required": 2,
+          "logical_op": "AND"
+        },
+        "team_reserve_pct": 0,
+        "philosophy": "Sunflower Land — no team reserve"
+      },
+      {
+        "slug": "FEED",
+        "type": "off_chain_point",
+        "transferable": false,
+        "purpose": "in_game_currency_and_breeding_cost"
+      }
+    ]
+  },
+  "contracts": [
+    { "name": "AnimalNFT", "standard": "ERC-721" },
+    { "name": "LandNFT", "standard": "ERC-721", "supply_cap_enforced": 5000 },
+    { "name": "ItemNFT", "standard": "ERC-1155" },
+    { "name": "RanchToken", "standard": "ERC-20", "deploy_at": "Season_2_post_TGE" },
+    { "name": "FeedClaim", "purpose": "oracle_signed_FEED_to_RANCH_swap_with_lockup" },
+    { "name": "Marketplace", "type": "EIP-712_orderbook_with_seaport_settlement", "self_deployed": true, "royalty_enforced": true }
+  ],
+  "audit": {
+    "budget_usd_cap": 40000,
+    "breakdown": { "primary_audit_usd": 30000, "re_audit_reserve_usd": 10000 },
+    "candidate_firms": ["Spearbit", "Code4rena"]
+  },
+  "localization_at_launch": ["en", "ja", "vi", "th"],
+  "localization_excluded": ["ko"],
+  "korean_ip_blocked": true,
+  "korean_kyc_payout_blocked": true,
+  "proof_of_humanity": "Gitcoin Passport",
+  "legal_entity_track": {
+    "season_0": "individual_or_singapore_BVI_Ltd",
+    "tge_minus_6mo": "Cayman_Foundation"
+  },
+  "open_source": true
+}

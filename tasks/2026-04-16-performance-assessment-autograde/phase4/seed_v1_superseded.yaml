@@ -1,0 +1,154 @@
+# superseded by seed_0badf1e571bc on 2026-04-16 (U1·U2·U3·U5 미반영)
+goal: Aura-board 교실 앱에서 수행평가(MCQ+OX+NUMERIC+SHORT 4종)를 배부·응시하고 자동채점 후 공통 Supabase Realtime을 통해 Aura 웹앱 성적 탭으로 실시간 송신하는 수행평가 자동화 파이프라인을 구축한다. 부정행위는 교사 알림 전용(ProctorEvent INSERT only), 성적 공개는 교사 수동 릴리스(teacher_manual), ESSAY는 schema-only로 v1.5 예약한다.
+task_type: code
+brownfield_context:
+  project_type: brownfield
+  context_references:
+  - path: seed_6d7077aac472
+    role: primary
+    summary: parent-viewer v2 — 학급코드·셀프매칭·교사승인·RLS 3중 격리·학부모 열람 조건(releasedAt+visibleToParent) 재사용
+  - path: seed_38c34e91bf28
+    role: primary
+    summary: assignment-board — AssignmentSlot 패턴 재사용. 수행평가 응시는 별도 AssessmentSubmission으로 느슨 FK 연결
+  - path: seed_26af361e92b7
+    role: reference
+    summary: canva-publisher-receiver — PAT 패턴. D2 폴백(미래 Supabase 분리 시) 마이그레이션 문서용으로만 참조
+  - path: seed_2
+    role: reference
+    summary: 'Free/Pro ₩9,900 Tier 구조 승계. 수행평가 기능 Tier 배치는 에스컬레이션 플래그(디폴트: Pro 전용, Free 월 1회 trial, LLM 채점 Pro 월 5000문항)'
+  existing_patterns:
+  - RLS 3중 격리 (학생·교사·학부모 역할별 Row Level Security)
+  - AssignmentSlot 느슨 FK 패턴
+  - 학급코드·셀프매칭·교사승인 플로우
+  - Supabase Realtime Postgres Changes 구독 패턴
+  - confirmedAt + releasedAt 2단계 확정 (Moodle 스타일)
+  - 프로바이더 추상화 src/lib/grading/providers/{gemini,openai,claude}.ts
+  - 매트릭스 뷰 owner+데스크톱 전용 게이트
+  - PAT 패턴 (D2 폴백 문서용)
+  existing_dependencies:
+  - Supabase (공통 project_ref, RLS, Realtime Postgres Changes)
+  - SurveyJS Form Library (MIT, React 네이티브 번들)
+  - tldraw/perfect-freehand (캔버스, S-Pen 60fps)
+  - Gemini 2.5 Flash (Vision OCR + SHORT/ESSAY LLM 채점)
+  - Sentence-Transformers (SHORT 코사인 유사도+키워드 매칭 전처리)
+  - Promptfoo (LLM 채점 회귀 스위트)
+  - React (Aura-board 프론트엔드)
+  - Chrome Android (기준 브라우저, 갤탭 S6 Lite)
+constraints:
+- 기준 단말 갤럭시 탭 S6 Lite (Snapdragon 720G, 4GB RAM, Chrome Android, S-Pen) — TTI < 3s, S-Pen 60fps, iframe ≤ 1
+- 'D1: Aura-board와 Aura 웹앱은 동일 Supabase project_ref 공유, D2 미구현'
+- v1 문항 유형 = MCQ+OX+NUMERIC+SHORT 4종, ESSAY는 UI off (schema-only, v1.5)
+- 부정행위 자동 잠금/제출 금지 — ProctorEvent INSERT only, 교사 대면 확인 전용
+- 매트릭스 뷰는 owner+데스크톱 전용 (editor·viewer·태블릿 제외)
+- Supabase Realtime Postgres Changes p95 < 500ms
+- OCR은 클라우드 오프로드 (Gemini 2.5 Flash Vision)
+- RLS 3중 격리 유지 (seed_6d7077aac472 승계)
+- 학부모는 releasedAt 이후 + visibleToParent=true 조건 충족 시만 성적 열람
+- 성적 공개 기본값 teacher_manual (gradebookReleasePolicy 플래그)
+- LLM 기본 프로바이더 Gemini 2.5 Flash, 프로바이더 추상화(gemini/openai/claude.ts)로 교체 가능
+- v1 타임라인 6~8주
+acceptance_criteria:
+- 교사가 AssessmentTemplate을 생성하고 학급에 배부할 수 있다
+- 학생이 갤탭 S6 Lite + Chrome Android에서 MCQ·OX·NUMERIC·SHORT 4종 문항에 응시할 수 있다
+- SurveyJS로 MCQ·OX·NUMERIC 자동채점, SHORT는 Sentence-Transformers 코사인 유사도+키워드 매칭 채점이 동작한다
+- AssessmentSubmission 상태머신(in_progress→submitted→grading→reviewed→confirmed→released)이 정상 전이된다
+- 시간 제한 초과 시 서버 cron이 in_progress→submitted 자동 전이한다
+- GradebookEntry가 confirmedAt 기록 후 교사 릴리스 버튼으로 releasedAt 설정되어 성적 공개된다
+- Supabase Realtime Postgres Changes로 성적 확정 후 Aura 웹앱 /aura-web/gradebook에 p95 < 500ms 내 실시간 반영된다
+- L1(Fullscreen/Visibility) 이탈 감지 시 ProctorEvent INSERT되고 교사 대시보드 배지/토스트로 알림된다(자동 잠금 없음)
+- L3 문항풀 랜덤·셔플·시간제한이 동작한다
+- 학부모는 releasedAt 이후 + visibleToParent=true 조건에서만 성적을 열람할 수 있다
+- 매트릭스 뷰는 owner 역할 + 데스크톱 환경에서만 노출된다
+- ESSAY 문항은 DB 스키마에 존재하나 교사 UI에 노출되지 않는다
+- Promptfoo 회귀 스위트로 SHORT 채점 품질이 릴리스 전 검증된다
+ontology_schema:
+  name: AssessmentPipelineOntology
+  description: Aura-board 수행평가 자동화 파이프라인의 핵심 도메인 모델. 평가 템플릿·문항·응시·답안·성적부·감독 이벤트 및 상태머신 전이를 표현한다.
+  fields:
+  - name: assessmentTemplate
+    type: object
+    description: 수행평가 템플릿 (제목·문항목록·시간제한·gradebookReleasePolicy·tier 플래그 포함)
+    required: true
+  - name: assessmentQuestion
+    type: object
+    description: '개별 문항 (kind: MCQ'
+    required: true
+  - name: assessmentSubmission
+    type: object
+    description: '학생 응시 레코드 (상태머신: in_progress→submitted→grading→reviewed→confirmed→released, confirmedAt, releasedAt)'
+    required: true
+  - name: assessmentAnswer
+    type: object
+    description: 문항별 답안 스냅샷 (studentId·questionId·rawInput·score·gradingMethod·gradedAt)
+    required: true
+  - name: gradebookEntry
+    type: object
+    description: 성적부 항목 (totalScore·maxScore·confirmedAt·releasedAt·visibleToParent·gradebookReleasePolicy)
+    required: true
+  - name: proctorEvent
+    type: object
+    description: '부정행위 감지 이벤트 (eventType: enum 8종·submissionId·detectedAt·severity·teacherAcknowledged)'
+    required: true
+  - name: proctorEventType
+    type: string
+    description: ProctorEventType enum 8종 (fullscreen_exit·visibility_hidden·tab_switch·time_warning·time_expired·focus_loss·network_drop·manual_flag)
+    required: true
+  - name: assessmentQuestionKind
+    type: string
+    description: 문항 유형 enum (MCQ·OX·NUMERIC·SHORT·ESSAY)
+    required: true
+  - name: gradebookReleasePolicy
+    type: string
+    description: 성적 공개 정책 (teacher_manual·auto_on_confirm)
+    required: true
+  - name: submissionStatus
+    type: string
+    description: 응시 상태머신 enum (in_progress·submitted·grading·reviewed·confirmed·released)
+    required: true
+  - name: classroom
+    type: object
+    description: 학급 (classCode·교사승인·RLS 격리 정책)
+    required: true
+  - name: assignmentSlot
+    type: object
+    description: AssignmentSlot 패턴 재사용 — 수행평가 배부 슬롯 (느슨 FK로 AssessmentSubmission 연결)
+    required: true
+evaluation_principles:
+- name: tablet_performance
+  description: 갤탭 S6 Lite 기준 TTI < 3s·S-Pen 60fps·iframe ≤ 1 준수 여부. 모든 컴포넌트 추가 시 태블릿 영향 평가 필수
+  weight: 0.25
+- name: realtime_latency
+  description: GradebookEntry 확정→Aura 웹앱 성적탭 반영까지 Supabase Realtime p95 < 500ms 달성 여부
+  weight: 0.2
+- name: grading_accuracy
+  description: SHORT 채점 Sentence-Transformers 코사인 유사도+키워드 매칭 정확도. Promptfoo 회귀 스위트 통과율
+  weight: 0.2
+- name: rls_isolation
+  description: RLS 3중 격리(학생·교사·학부모 역할 분리) 정책 위반 없음. 학부모는 releasedAt+visibleToParent=true 조건만
+  weight: 0.15
+- name: proctor_false_positive
+  description: ProctorEvent 오탐(갤탭 홈버튼·알림배너·S-Pen 충돌) 억제. 자동 잠금 없음·교사 대면 확인 전용 정책 준수
+  weight: 0.1
+- name: state_machine_integrity
+  description: AssessmentSubmission 상태머신 전이 유효성. 서버 cron 시간초과 전이·수동 릴리스 정확성
+  weight: 0.1
+exit_conditions:
+- name: v1_scope_complete
+  description: v1 문항 4종(MCQ·OX·NUMERIC·SHORT) 채점·제출·성적 공개 전체 파이프라인이 갤탭 S6 Lite에서 정상 동작 확인
+  criteria: acceptance_criteria 전항목 통과 + Promptfoo 회귀 그린 + RLS 침투 테스트 통과
+- name: escalation_required
+  description: 사용자 확정 필요 5개 항목(Tier 배치·LLM 벤더·부정행위 정책·성적 공개 타이밍·ESSAY 스코프) 중 디폴트 변경 요청 발생
+  criteria: decisions.md 에스컬레이션 플래그 확인 후 사용자 AskUserQuestion 트리거
+- name: timeline_breach
+  description: v1 타임라인 8주 초과 또는 ESSAY v1 편입 요청으로 +3~4주 추가 확정
+  criteria: 오케스트레이터가 사용자에게 타임라인 재협상 보고
+- name: pilot_gate
+  description: 1학기 파일럿 교실 배포 후 교사 피드백 수렴 완료
+  criteria: 파일럿 리포트 + v1.5 백로그(ESSAY·임계값 UI·Knox Kiosk) 확정
+metadata:
+  seed_id: seed_9f8c6764324e
+  version: 1.0.0
+  created_at: '2026-04-15T22:45:30.889158Z'
+  ambiguity_score: 0.147
+  interview_id: interview_20260415_223155
+  parent_seed_id: null
