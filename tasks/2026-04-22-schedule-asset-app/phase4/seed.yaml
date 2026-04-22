@@ -1,0 +1,221 @@
+goal: |
+  Build a Korean greenfield Android mobile app (MVP) combining a lightweight schedule
+  tab with a *coercive asset-management* tab that forces users toward their monthly
+  savings goals through a three-layer enforcement stack: (1) pre-allocation via Open
+  Banking weekly auto-transfer to a locked savings account, (3) behavioral friction
+  via Android Accessibility-based shopping/delivery app blocking when the daily budget
+  is exceeded, with layer (2) monetary penalty-on-failure via pre-authorized donation
+  transfer deferred to v1.1. The schedule tab auto-injects financial events (payday,
+  card billing dates, goal deadlines) so 'schedule+asset' is a single coherent surface.
+  Target user is a 20~30s Korean consumer who has tried Banksalad/Toss-type trackers
+  but still overspends because those apps only record and warn — this app adds the
+  missing enforcement layer while staying inside what a 2-person full-stack team without
+  a MyData business license can legally ship.
+task_type: code
+greenfield_context:
+  project_type: greenfield
+  starting_from_zero: true
+  stack_hints:
+  - Android (Kotlin) + Jetpack Compose
+  - 'Local DB: SQLite + SQLCipher encryption'
+  - Open Banking REST API (금융결제원) for transfers
+  - Android SMS parsing via READ_SMS with NotificationListener fallback
+  - Android Accessibility Service for app blocking/delay
+  - Optional thin sync backend (Supabase or Node.js) from v1.1
+  - No MyData license (out of scope for 2-person team)
+  references_for_inspiration:
+  - Qapital (rules-based auto-savings, US)
+  - Beeminder (penalty-on-failure pledge)
+  - YNAB (zero-based budgeting)
+  - Freedom / One Sec (OS-level app blocking)
+  - 토스 / 뱅크샐러드 (Korean MyData reference — NOT integrated, inspiration only)
+constraints:
+- Android-only MVP; iOS deferred to v2 (SMS/Screen Time constraints)
+- Korean MyData business license not obtainable for 2-person team (최소자본금 5억 원) —
+  rely on Open Banking transfer API + SMS parsing + manual input instead
+- Open Banking auto-transfer default frequency = weekly (Friday evening); daily mode
+  opt-in only
+- Penalty-on-failure transfer (layer 2) deferred to v1.1; MVP ships only with layers
+  1+3
+- Penalty transfer recipients restricted to whitelisted donation organizations (공익법인
+  only); third-party personal accounts forbidden (전자금융거래법 risk)
+- App-blocking (layer 3) implemented via Android Accessibility Service; iOS cannot
+  be supported at parity
+- 'Local-first data: 계좌번호·카드번호·거래원문 stored only in local SQLCipher DB; server persistence
+  of raw financial identifiers forbidden'
+- Server-side (if used) stores only anonymized metadata and user ID; sync tokens only
+- Revenue model for MVP~v1.1 = free, no ads, no recommendations (user-confirmed 2026-04-22)
+- Team composition = 2 full-stack developers (안선민, 심보승); no fixed role split — task-board
+  based ownership; weekly sync + mandatory PR review required
+- SMS parsing card issuers supported in MVP = 신한, 삼성, 현대, KB, BC (top 5, ~70% market
+  coverage); others fall back to manual entry
+- Play Store READ_SMS approval uncertain — NotificationListener fallback path must
+  be implemented in parallel from day 1
+- Accessibility permission health checked weekly; 14-day unauthorized state auto-disables
+  layer 3 with in-app notice
+- Schedule tab auto-injects financial events (payday, card billing dates, goal deadlines);
+  user-entered generic events are secondary
+- OCR receipt recognition parked to v1.1+ (re-evaluate if manual-entry friction shows
+  in beta data)
+- Family/couple budget sharing parked to v2+
+- Real-time card-payment blocking at PG level is infeasible without issuer partnerships
+  — not pursued
+- Closed beta uses developer personal accounts to validate transfer logic; fintech
+  service registration (전자금융업자) required before public launch
+- Incorporation decision (법인화) parked until pre-v1.1; individual-dev fintech registration
+  is possible but corporate preferred
+- No Aura-board / padlet / Canva / tablet synergy — standalone app; phase7 dispatcher
+  routes to `internal` fallback or proposes a new destination
+- 'MVP ships on consumer Android phones (target: Samsung Galaxy A-series, 4GB RAM,
+  중저가); cold start < 1.5s, background battery < 2%/day'
+acceptance_criteria:
+- User sets a monthly savings goal and daily spending budget during onboarding
+- By default, every Friday evening the app triggers an Open Banking auto-transfer
+  moving the weekly savings quota to a locked savings account (AssetFreeze); daily-mode
+  opt-in is available in settings
+- When daily spending exceeds the budget, a push warning is issued and the next day's
+  budget is automatically reduced
+- 'Layer-3 app blocking: when in a budget-exceeded state, the Android Accessibility
+  Service delays/blocks launching of user-configured shopping and delivery apps (BlockedAppRule)'
+- If Accessibility permission is revoked for 14 consecutive days, layer-3 enforcement
+  auto-disables and the user is notified in-app
+- SMS-based transaction capture uses READ_SMS when approved; if Play Store denies
+  READ_SMS, NotificationListener fallback provides the same capture — both paths implemented
+  in parallel
+- MVP parses SMS/notifications from 신한·삼성·현대·KB·BC card issuers; other issuers fall
+  back to manual entry
+- Schedule tab auto-injects payday, card billing date, and goal deadline events; user-created
+  generic events are displayed alongside
+- Account numbers, card numbers, and raw transaction SMS bodies are stored only in
+  the local SQLCipher-encrypted DB; server persistence of raw identifiers is prohibited
+- 'Layer-2 penalty pledge (PenaltyPledge) ships in v1.1: user pre-authorizes a fixed
+  amount to transfer to a whitelisted donation organization when a monthly goal is
+  missed; penalties to arbitrary third-party accounts are rejected'
+- Open Banking fintech service registration is completed before public launch; closed
+  beta operates under developer personal accounts for transfer-logic validation
+- MVP revenue model = free with no ads and no financial-product recommendations; v2
+  revisits penalty-fee or subscription options
+- Two full-stack developers share ownership by task rather than fixed module boundaries;
+  weekly sync and mandatory PR review are process requirements documented in the handoff
+  note
+- App targets Korean mid-range Android phones (Galaxy A-series tier, 4GB RAM); cold
+  start under 1.5s; background SMS/notification parsing averages under 2% daily battery
+- iOS is out of MVP scope; a reduced iOS variant (manual input + layer-1 only, no
+  SMS, no Accessibility blocking) is planned for v2
+- OCR receipt capture, family/couple budget sharing, third-party penalty transfers,
+  and MyData integration are explicitly out of MVP scope (parked)
+- EnforcementEvent table logs every layer-1/2/3 execution (time, rule, amount or app
+  blocked, outcome) for user audit and debugging
+- No integration with Aura-board, padlet, Canva, or tablet UX; the app is delivered
+  to `internal` fallback or a new dedicated destination during phase7 dispatch
+ontology_schema:
+  name: ScheduleAssetAppDomain
+  description: Domain model for a Korean Android personal finance app with a three-layer
+    enforcement stack (pre-allocation / penalty / app-blocking) and a financial-event-aware
+    schedule tab
+  fields:
+  - name: User
+    type: object
+    description: Root account (email or phone), onboarding profile, role flags
+    required: true
+  - name: ScheduleEvent
+    type: object
+    description: Schedule tab entity; type enum covers user_event, payday, card_billing,
+      goal_deadline, rule_execution
+    required: true
+  - name: Account
+    type: object
+    description: Registered bank/card account (Open Banking fintech_use_num or manual);
+      source enum=open_banking|manual
+    required: true
+  - name: Transaction
+    type: object
+    description: Captured spending/income record; source enum=sms|notification|open_banking|manual;
+      encrypted fields for raw body and card/account identifiers
+    required: true
+  - name: Category
+    type: object
+    description: Spending category with color, parent category, monthly cap override
+    required: true
+  - name: MonthlyBudget
+    type: object
+    description: Per-month savings target and total spending cap; linked to SavingRule
+      set
+    required: true
+  - name: DailyBudget
+    type: object
+    description: Derived daily cap from MonthlyBudget; records actual spend and overflow
+      flag; next-day reduction applied on overflow
+    required: true
+  - name: SavingRule
+    type: object
+    description: Qapital-style rule (trigger + action + target account); MVP default
+      is weekly Friday transfer; daily opt-in available
+    required: true
+  - name: PenaltyPledge
+    type: object
+    description: v1.1 entity; pre-authorized donation transfer amount + recipient
+      (whitelisted org only) + trigger condition (monthly goal missed)
+    required: true
+  - name: AssetFreeze
+    type: object
+    description: Locked savings account state; lock_level, release_condition, release_date
+    required: true
+  - name: BlockedAppRule
+    type: object
+    description: Android Accessibility-based block/delay rule; app_package, action
+      enum=delay|block, trigger enum=budget_exceeded|always, delay_seconds
+    required: true
+  - name: EnforcementEvent
+    type: object
+    description: Audit log of every layer-1/2/3 execution (time, rule_id, amount or
+      app, outcome=success|fail|skip)
+    required: true
+evaluation_principles:
+- name: enforcement_integrity
+  description: Three-layer enforcement must actually execute without silent failure;
+    users cannot trivially bypass without explicit opt-out UI
+  weight: 0.25
+- name: korean_regulation_safety
+  description: Operate within 전자금융거래법 / 개인정보보호법 / MyData non-registered boundaries;
+    Open Banking fintech registration completed before public launch
+  weight: 0.20
+- name: data_security
+  description: Raw financial identifiers encrypted at rest via SQLCipher; no server
+    storage of raw identifiers; Keystore for encryption keys
+  weight: 0.20
+- name: mobile_performance
+  description: Cold start < 1.5s on Galaxy A-series tier; background capture < 2%
+    daily battery; Open Banking API call quota respected
+  weight: 0.15
+- name: mvp_scope_discipline
+  description: 2-person full-stack team must ship in ~6 months; parked items (penalty,
+    OCR, iOS, family sharing, MyData) are not pulled in under pressure
+  weight: 0.20
+exit_conditions:
+- name: all_questions_resolved
+  description: All 7 sketch open questions + 5 derived questions = 12 agent-autonomous
+    confirmed; 2 user-confirmed decisions on 2026-04-22 (revenue=none, team=fullstack_shared);
+    ambiguity = 0.00
+  criteria: ambiguity score ≤ 0.2 across all decision dimensions
+- name: enforcement_stack_defined
+  description: MVP = layers 1+3; v1.1 adds layer 2 (donation-only penalty); layer
+    boundaries and fallback behaviors specified
+  criteria: All three enforcement layers have defined entities, triggers, and disable/health-check
+    rules
+- name: data_model_stable
+  description: 12 domain entities finalized with required-field coverage; sketch.md
+    Prisma draft translated to ontology_schema without new unresolved entities
+  criteria: All 12 entities present with required field descriptions
+- name: handoff_ready
+  description: 'phase7 dispatcher routing information recorded: no existing external
+    destination matches; proposal is `internal` fallback or a new destination (e.g.,
+    ''schedule-asset-app'' or ''personal-finance'' class)'
+  criteria: Routing hint present in constraints and acceptance criteria
+metadata:
+  seed_id: seed_20260422_schedule_asset_app_a7c3
+  version: 1.0.0
+  created_at: '2026-04-22T11:50:00+09:00'
+  ambiguity_score: 0.0
+  interview_id: self-driven-interview-2026-04-22-schedule-asset-app
+  parent_seed_id: null

@@ -6,7 +6,7 @@
 
 ---
 
-## 📋 전체 Seed 13개 (Aura-board 10개 + refinement 1개 + 외부 프로젝트 2개)
+## 📋 전체 Seed 14개 (Aura-board 10개 + refinement 1개 + 외부 프로젝트 3개)
 
 > **Refinement 처리**: Seed 7(v1)은 2026-04-13 refinement 파이프라인 통과 후 `seed_6d7077aac472` (v2)로 **supersede**되었다. 원시드(`seed_37b35654542f`)는 감사 이력으로 읽기 전용 보존, v2가 활성 스펙이다. parent-viewer-roadmap.md는 v2 기준으로 in-place 갱신됨.
 
@@ -25,6 +25,7 @@
 | 10 | 코지 P2E 목장 게임 (mallang-ranch-p2e) | `seed_f85d1cb8a245` | `interview_20260413_070940` | 0.132 | `mallang-ranch-p2e-roadmap.md` (신규) | **mallang-ranch** (외부 신규 P2E) |
 | 11 | 과제 배부 보드 (assignment-board) | `seed_38c34e91bf28` | `interview_20260414_131412` | 0.083 | `assignment-board-roadmap.md` (신규) | padlet |
 | 12 | 수행평가 자동채점 파이프라인 (assessment-autograde) | `seed_0badf1e571bc` | `interview_20260415_224854` | 0.10 | `assessment-autograde-roadmap.md` (신규) | padlet |
+| 13 | 일정+강제성 자산관리 Android 앱 (schedule-asset-app) | `seed_20260422_schedule_asset_app_a7c3` | `self-driven-2026-04-22-schedule-asset-app` | 0.00 | `schedule-asset-app-roadmap.md` (신규) | **internal** (신규 모바일 앱 — phase7 분기) |
 
 모든 seed ambiguity ≤ 0.2 (임계치) — seed-ready 상태. `ooo run`으로 실행 가능.
 
